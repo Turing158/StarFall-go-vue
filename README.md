@@ -13,9 +13,9 @@
 
 
 
-**gitee:** [StarFall-Vue3](https://gitee.com/turing-ice/StarFall-vue) | [StarFall-SpringBoot3](https://gitee.com/turing-ice/StarFall-SpringBoot)
+**gitee:** [StarFall-go-Vue3](https://gitee.com/turing-ice/StarFall-go-vue) | [StarFall-go](https://gitee.com/turing-ice/StarFall-go)
 
-**github:** [StarFall-Vue3](https://github.com/Turing158/StarFall-vue) | [StarFall-SpringBoot3](https://github.com/Turing158/StarFall-SpringBoot)
+**github:** [StarFall-go-Vue3](https://github.com/Turing158/StarFall-go-vue) | [StarFall-go](https://github.com/Turing158/StarFall-go)
 
 ---
 
