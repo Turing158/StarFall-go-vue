@@ -1,0 +1,33 @@
+*{
+    margin:0px;
+    padding:0px;
+    user-select: none;
+}
+@keyframes move {
+    0% {
+      transform: translateX(100vw);
+    }
+    100% {
+      transform: translateX(-100%);
+    }
+  }
+  @-moz-keyframes move {
+    0% {
+      transform: translateX(100vw);
+    }
+    100% {
+      transform: translateX(-100%);
+    }
+  }
+  
+  @-webkit-keyframes move {
+    0% {
+      transform: translateX(100vw);
+    }
+    100% {
+      transform: translateX(-100%);
+    }
+  }
+
+
+
