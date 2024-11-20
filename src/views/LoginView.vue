@@ -61,7 +61,6 @@ const confirm = async () => {
   } else {
     await login(account.value, password.value, codeImg.value.codeId+":"+code.value)
       .then(async(res) => {
-        let msg = res.data.msg
         userStore.setToken(res.data.object)
         await getUserInfo().then(res=>{
           let data = res.data.object
@@ -83,10 +82,10 @@ const confirm = async () => {
             title: '登录成功',
             message:'已前往主页，愉快的进行探索吧！',
             type:'success'
-          }).catch(err=>{
-            let msg = err.response.data.ERROR
-            ElMessage.error(msg)
           })
+        }).catch(err=>{
+          let msg = err.response.data.ERROR
+          ElMessage.error(msg)
         })
       })
       .catch((err) => {
