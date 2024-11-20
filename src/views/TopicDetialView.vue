@@ -82,19 +82,19 @@ const loading = ElLoading.service({
 const init = async () => {
   await getTopicInfo(route.params.id)
     .then((res) => {
-      let msg = res.data.msg
-      if (msg == 'ID_ERROR') {
-        ElMessage.error('此主题帖已被删除或不存在')
-      } else {
-        let data = res.data.object
-        console.log(res)
+      let data = res.data.object
         topicInfo.value = data
         error.value = false
         getComment()
-      }
     })
     .catch((err) => {
-      ElMessage.error('服务异常')
+      let msg = err.response.data.ERROR
+      if (msg == "This topic does not exist"){
+        ElMessage.error('此主题帖已被删除或不存在')
+      }else {
+        ElMessage.error('服务异常')
+      }
+      
     })
   bookOut.value.setHeight()
   loading.close()
@@ -108,16 +108,20 @@ const changePage = (e) => {
 const getComment = async () => {
   await findCommentByTopic(route.params.id, page.value)
     .then((res) => {
-      let msg = res.data.msg
-      if (msg == 'SUCCESS') {
-        comments.value = res.data.object
-        commentsCount.value = res.data.num
-      } else {
-        ElMessage.error('获取评论失败')
-      }
+      let data = res.data.object
+      comments.value = data.comments
+      commentsCount.value = data.count
     })
     .catch((err) => {
-      ElMessage.error('服务异常')
+      let msg = err.response.data.ERROR
+      if (msg == "ID is not a number"){
+        ElMessage.error('主题ID不是数字')
+      }else if(msg == "page is not a number"){
+        ElMessage.error('页码不是数字')
+      }else {
+        ElMessage.error('获取评论失败')
+      }
+      
     })
   bookOut.value.setHeight()
 }

@@ -18,15 +18,24 @@ request.interceptors.request.use((config) => {
   return config
 })
 
-request.interceptors.response.use(res=>{
-  let msg = res.data.msg
+request.interceptors.response.use((res)=>{
   const userStore = useUserStore()
-  if (res.headers.Authorization){
-    userStore.token = res.headers.Authorization
+  let authorization = res.headers.get("Authorization")
+  if (authorization){
+    userStore.token = authorization
   }
-  if(msg == "NOT_PERMISSION"){
-    ElMessage.error("权限不足，你想干嘛？")
-  }
+  
+  // if(msg == "NOT_PERMISSION"){
+  //   ElMessage.error("权限不足，你想干嘛？")
+  // }
   return res
+},(err)=>{
+  let errMsg = err.response.data.ERROR
+  if(errMsg == "The token is null"){
+    ElMessage.error("为获取到用户信息，请登录！")
+  }else if(errMsg == "The token has expired" || errMsg == "Token is expired"){
+    ElMessage.error("token已过期,请重新登录！")
+  }
+  return Promise.reject(err)
 })
 export default request

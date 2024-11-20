@@ -191,18 +191,23 @@ const initLike = async () => {
   if (userStore.isLogin) {
     await getLike(props.id)
       .then((res) => {
-        let msg = res.data.msg
-        if (msg == 'IS_LIKE') {
+        let status = res.data.object.status
+        if (status == 'IS_LIKE') {
           isLike.value = 1
-          likeNum.value = res.data.num
-        } else if (msg == 'IS_DISLIKE') {
+          likeNum.value = res.data.object.count
+        } else if (status == 'IS_DISLIKE') {
           isLike.value = 2
         } else {
           isLike.value = 0
         }
       })
       .catch((err) => {
-        ElMessage.error('获取点赞信息失败')
+        let msg = err.response.data.ERROR
+        if (msg == "ID is not a number") {
+          ElMessage.error('主题ID不是数字')
+        } else {
+          ElMessage.error('获取点赞信息失败')
+        }
       })
   } else {
     isLike.value = 0
@@ -213,9 +218,8 @@ const onLike = async (op) => {
   if (userStore.isLogin) {
     await LikeOrDislike(props.id, op)
       .then((res) => {
-        let msg = res.data.msg
-        let num = res.data.num
-        if (msg == 'ALREADY_LIKE') {
+        let status = res.data.msg
+        if (status == 'ALREADY_LIKE') {
           isLike.value = 0
           ElNotification({
               title: '你撤回评价了',
@@ -226,7 +230,7 @@ const onLike = async (op) => {
         } else {
           if (op == 1) {
             isLike.value = 1
-            likeNum.value = num
+            likeNum.value = res.data.object
             ElNotification({
               title: '你点赞了',
               message: props.data.title,
@@ -245,7 +249,15 @@ const onLike = async (op) => {
         }
       })
       .catch((err) => {
-        ElMessage.error('点赞失败，服务异常')
+        console.log(err)
+        let msg = err.response.data.ERROR
+        if (msg == "like value is not a number"){
+          ElMessage.error('点赞值不是数字')
+        } else if (msg == "ID is not a number") {
+          ElMessage.error('主题ID不是数字')
+        } else {
+          ElMessage.error('点赞失败，服务异常')
+        }
       })
   } else {
     ElNotification({
