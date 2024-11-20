@@ -61,13 +61,13 @@
             <el-table-column prop="message" label="消息" />
             <el-table-column prop="emotion" label="心情" width="60" align="center" />
           </el-table>
-          <Empty height="20" />
+          <Empty :height="20" />
           <div class="operate">
             <div>
               <el-pagination
               :total="signInCount"
               :page-size="6"
-              background="true"
+              :background="true"
               layout="prev, pager, next"
               @current-change="changePage"
             />
@@ -105,25 +105,20 @@ const pageNum = ref(1)
 const signInCount = ref(0)
 const getSignList = async() =>{
   await findAllSignIn(pageNum.value).then(res=>{
-    let msg = res.data.msg
-    if(msg == 'SUCCESS'){
-      let data = res.data.object
-      let num = res.data.num
-      if( data.length != 0 && date.value === data[0].date){
-        isSignIn.value = true
-      }
-      signInList.value = data
-      continueSignIn.value = num
-      listLoading.value = false
+    let data = res.data.object
+    if( data.signIns.length != 0 && date.value === data.signIns[0].date){
+      isSignIn.value = true
     }
-  }).catch(err=>{
-    ElMessage.error('服务异常')
-  })
-  await countSignIn().then(res=>{
-    let msg = res.data.msg
-    
-    if(msg == 'SUCCESS'){
-      signInCount.value = res.data.num
+    signInList.value = data.signIns
+    continueSignIn.value = data.continualCount
+    signInCount.value = data.count
+    listLoading.value = false
+    if (res.data.object.error) {
+      ElNotification.warning({
+        title: '签到日期格式有误，请联系管理员',
+        message: "此情况不会影响到什么，只是会让连续签到天数显示错误",
+        type: 'warning'
+      })
     }
   }).catch(err=>{
     ElMessage.error('服务异常')
@@ -190,7 +185,6 @@ const confirmSignIn = async()=>{
       }
     }).catch(err=>{
       ElMessage.error('签到失败')
-    
     })
   }
   
