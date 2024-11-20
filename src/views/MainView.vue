@@ -89,18 +89,18 @@ const onClose = (e) => {
 }
 const webSocket = ref()
 const init = ()=>{
-  let url = 'ws://10.24.5.7:8080/message/'+userStroe.token
-  if(userStroe.isLogin){
-    webSocket.value = new WebSocket(url)
-    webSocket.value.onopen = onOpen
-    webSocket.value.onerror = onError
-    webSocket.value.onmessage = onMessage
-    webSocket.value.onclose = onClose
-    webSocket.value.send = onSend
+  // let url = 'ws://10.24.5.7:8080/message/'+userStroe.token
+  // if(userStroe.isLogin){
+  //   webSocket.value = new WebSocket(url)
+  //   webSocket.value.onopen = onOpen
+  //   webSocket.value.onerror = onError
+  //   webSocket.value.onmessage = onMessage
+  //   webSocket.value.onclose = onClose
+  //   webSocket.value.send = onSend
     
-  }
+  // }
 }
-provide('webSocket',webSocket)
+// provide('webSocket',webSocket)
 onMounted(init)
 </script>
 <style scoped>
