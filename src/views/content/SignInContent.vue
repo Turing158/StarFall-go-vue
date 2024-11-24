@@ -44,7 +44,7 @@
           <div class="info">
             <span class="date">{{ date }}</span>
             <span v-show="!isSignIn">今天暂未签到</span>
-            <span v-show="isSignIn">已连续签到{{ continueSignIn }}天</span>
+            <span v-show="isSignIn">已连续签到<span style="color: #555;font-weight: bold;">{{ continueSignIn }}</span>天</span>
           </div>
           <div class="sign">
             <div v-show="!isSignIn">
@@ -145,46 +145,43 @@ const confirmSignIn = async()=>{
   }
   else{
     await signIn(message.value,emotion.value).then(async(res)=>{
-      let msg = res.data.msg
-      if(msg == 'SUCCESS'){
-        let num = res.data.num
-        ElNotification({
-          title: '签到成功',
-          message: "经验添加"+num+"点",
-          type: 'success'
-        })
-        isSignIn.value = true
-        getSignList()
-        signPage.value = false
-        await getUserInfo().then(res=>{
-          let msg = res.data.msg
-          if(msg == 'SUCCESS'){
-            let data = res.data.object
-            userStore.setUserObject(
-              data.user,
-              data.name,
-              data.level,
-              data.exp,
-              data.maxExp,
-              data.gender,
-              data.birthday,
-              data.avatar,
-              data.email
-            )
-          }
-        }).catch(err=>{
-          ElMessage.error('服务异常')
-        })
-      }
-      else{
+      let num = res.data.object
+      ElNotification({
+        title: '签到成功',
+        message: "经验添加"+num+"点",
+        type: 'success'
+      })
+      isSignIn.value = true
+      getSignList()
+      signPage.value = false
+      await getUserInfo().then(res=>{
+        let data = res.data.object
+          userStore.setUserObject(
+            data.user,
+            data.name,
+            data.level,
+            data.exp,
+            data.maxExp,
+            data.gender,
+            data.birthday,
+            data.avatar,
+            data.email
+          )
+      }).catch(err=>{
+        ElMessage.error('服务异常')
+      })
+      
+    }).catch(err=>{
+      let msg = err.response.data.ERROR
+      if (msg == "You have already signed it today"){
         ElNotification.error({
           title: '签到失败',
           message: "你已经签到过了今天",
           type: 'error'
         })
+      }else {
+        ElMessage.error('签到失败')
       }
-    }).catch(err=>{
-      ElMessage.error('签到失败')
     })
   }
   
