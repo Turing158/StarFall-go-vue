@@ -103,7 +103,7 @@ const page = ref(1)
 const changePage = (e) => {
   page.value = e
   getComment()
-
+  page.value = e
 }
 const getComment = async () => {
   await findCommentByTopic(route.params.id, page.value)
@@ -134,25 +134,26 @@ const onComment = async () => {
   } else if (editComment.value.content.length < 10) {
     ElMessage.error('评论内容不能少于10个字符')
   } else {
-    await appendComment(route.params.id, editComment.value.content, editComment.value.code)
+    await appendComment(route.params.id, editComment.value.content, editComment.value.codeImg.codeId+":"+editComment.value.code)
       .then((res) => {
-        let msg = res.data.msg
-        if (msg == 'CODE_ERROR') {
-          ElMessage.error('验证码错误')
-        } else {
-          ElNotification({
-            title: '评论成功!',
-            message: editComment.value.content.substr(0, 10) + '...',
-            type: 'success'
-          })
-          editComment.value.content = ''
-          editComment.value.code = ''
-          changePage(((res.data.num + 9) / 10).toString().split('.')[0]) 
-
-        }
+        ElNotification({
+          title: '评论成功!',
+          message: editComment.value.content.substr(0, 10) + '...',
+          type: 'success'
+        })
+        editComment.value.content = ''
+        editComment.value.code = ''
+        changePage(((res.data.object + 9) / 10).toString().split('.')[0]) 
       })
       .catch((err) => {
-        ElMessage.error('服务异常')
+        let msg = err.response.data.ERROR
+        console.log(msg)
+        if (msg == "The code is wrong"){
+          ElMessage.error('验证码错误')
+        }else {
+          ElMessage.error('服务异常')
+        }
+        
       })
     editComment.value.codeImg.changeCode()
   }
@@ -167,18 +168,27 @@ const delComment = (i, date) => {
     .then(async () => {
       await deleteComment(route.params.id, date)
         .then((res) => {
-          let msg = res.data.msg
-          if (msg == 'SUCCESS') {
-            ElNotification({
+          ElNotification({
               title: '删除成功!',
               message: '评论已删除',
               type: 'success'
             })
             router.go(0)
-          }
         })
         .catch(() => {
-          ElMessage.error('服务异常')
+          let msg = err.response.data.ERROR
+          if (msg == "Id must be a number"){
+            ElMessage.error('主题ID不是数字')
+          }
+          else if(msg == "The format of date is wrong"){
+            ElMessage.error('日期格式错误')
+          }
+          else if (msg == "DataSource error"){
+            ElMessage.error('数据库错误')
+          }
+          else{
+            ElMessage.error('发布评论失败')
+          }
         })
     })
     .catch(() => {
