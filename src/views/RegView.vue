@@ -74,11 +74,7 @@ const onGetEmailCode = async () => {
     if (email.value.length != 0) {
       await getEmailCode(email.value)
         .then((res) => {
-          let msg = res.data.msg
-          if (msg == 'EMAIL_ERROR') {
-            ElMessage.error('邮箱已存在')
-          } else {
-            ElNotification({
+          ElNotification({
               title: '验证码',
               message:'已发送至邮箱'+email.value,
               type:'success'
@@ -94,11 +90,18 @@ const onGetEmailCode = async () => {
                 second.value = 30
               }
             },1000)
-          }
         })
         .catch((err) => {
-          console.log(err)
-          ElMessage.error('服务异常')
+          let msg = err.response.data.ERROR
+          if (msg == "The Email is already exists"){
+            ElMessage.error('邮箱已存在')
+          }
+          else if (msg == "The email cannot be empty"){
+            ElMessage.error('邮箱不能为空')
+          }
+          else {
+            ElMessage.error('服务异常')
+          }
         })
     } else {
       ElMessage.error('邮箱不能为空')
@@ -118,27 +121,33 @@ const onReg = async () => {
   } else if (code.value.length == 0) {
     ElMessage.error('验证码不能为空')
   } else {
-    await register(user.value, password.value, email.value, emailCode.value, code.value).then(
+    await register(user.value, password.value, email.value, emailCode.value, codeImg.value.codeId+":"+code.value).then(
       (res) => {
-        let msg = res.data.msg
-        if (msg == 'EMAIL_ERROR') {
-          ElMessage.error('邮箱已存在')
-        } else if (msg == 'EMAIL_CODE_ERROR') {
-          ElMessage.error('邮箱验证码错误')
-        } else if (msg == 'USER_ERROR') {
-          ElMessage.error('用户名已存在')
-        } else {
-          ElNotification({
+        ElNotification({
               title: '注册成功',
               message:'已前往登录界面，可进行登录',
               type:'success'
             })
           router.push('/login')
-        }
       }
     )
     .catch((err) => {
-      ElMessage.error('服务异常')
+      let msg = err.response.data.ERROR
+      if (msg == "The code is wrong"){
+        ElMessage.error('验证码错误')
+      }
+      else if (msg == "The Email already exists"){
+        ElMessage.error('邮箱已存在')
+      }
+      else if (msg == "The Email code is wrong"){
+        ElMessage.error('邮箱验证码错误')
+      }
+      else if (msg == "The user already exists"){
+        ElMessage.error('用户名已存在')
+      }
+      else {
+        ElMessage.error('服务异常')
+      }
     })
     codeImg.value.changeCode()
   }
