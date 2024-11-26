@@ -243,7 +243,7 @@ ul .avatar_img {
   background-size: 100%;
   border-radius: 0px 0px 5px 5px;
   width: 150px;
-  height: 115px;
+  height: 125px;
   top: -2px;
   right: -100px;
   opacity: 1;
@@ -262,9 +262,10 @@ ul .avatar_img {
   margin: 0;
   font-size: 18px;
   width: 100%;
-  height: 40px;
-  line-height: 40px;
+  height: 50px;
   text-align: center;
+  display: flex;
+  align-items: center;
 }
 .menu .exp {
   position: relative;
