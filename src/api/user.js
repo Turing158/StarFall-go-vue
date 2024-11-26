@@ -18,6 +18,12 @@ export const getEmailCode = (email)=>{
     return request.post('/getEmailCode',param)
 }
 
+export const getForgetEmailCode = (email)=>{
+    let param = new URLSearchParams()
+    param.append('email',email)
+    return request.post('/getForgetEmailCode',param)
+}
+
 
 export const register = (user,password,email,emailCode,code)=>{
     let param = new URLSearchParams()

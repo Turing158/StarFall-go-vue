@@ -57,7 +57,7 @@
     </div>
 </template>
 <script setup>
-import { checkForget, forgetPassword, getEmailCode } from '@/api/user';
+import { checkForget, forgetPassword, getForgetEmailCode } from '@/api/user';
 import Code from '@/components/Code.vue';
 import McBtn from '@/components/McBtn.vue';
 import Empty from '@/components/FitEmpty.vue';
@@ -77,15 +77,16 @@ const onGetEmailCode = async() => {
         ElMessage.error('邮箱不能为空')
     }
     else{
-        await getEmailCode(email.value).then(res=>{
-            if(res.data.msg === "SUCCESS"){
-                ElMessage.success('验证码发送成功')
+        await getForgetEmailCode(email.value).then(res=>{
+            ElMessage.success('验证码发送成功')
+        }).catch(err=>{
+            let msg = err.response.data.ERROR
+            if (msg == "The Email is not exists"){
+                ElMessage.error('邮箱不存在')
             }
             else{
                 ElMessage.error('验证码发送失败')
             }
-        }).catch(err=>{
-            ElMessage.error('验证码发送失败')
         })
     }
 }
@@ -102,23 +103,29 @@ const onCheck = async() => {
             ElMessage.error('验证码不能为空')
         }
         else{
-            await checkForget(email.value,emailCode.value,code.value).then(res=>{
-                let msg = res.data.msg
-                if(msg === 'SUCCESS'){
-                    userStore.setToken(res.data.object)
-                    forgetPage.value = true
-                }
-                else if(msg === 'EMAIL_CODE_EXPIRED'){
-                    ElMessage.error('邮箱验证码过期')
-                }
-                else if(msg === 'EMAIL_CODE_ERROR'){
-                    ElMessage.error('邮箱验证码错误')
-                }
-                else if(msg === 'CODE_ERROR'){
+            await checkForget(email.value,emailCode.value,codeImg.value.codeId+":"+code.value).then(res=>{
+                console.log(res)
+                userStore.setToken(res.data.object)
+                forgetPage.value = true
+                
+            }).catch(err=>{
+                let msg = err.response.data.ERROR
+                if(msg === 'The code is wrong'){
                     ElMessage.error('验证码错误')
                 }
-            }).catch(err=>{
-                ElMessage.error('验证失败')
+                else if(msg === 'Email verification code has expired or not been sent'){
+                    ElMessage.error('邮箱验证码过期或未发送')
+                }
+                else if(msg === 'The Email code is wrong'){
+                    ElMessage.error('邮箱验证码错误')
+                }
+                else if (msg == "The Email is not exists"){
+                    ElMessage.error('邮箱不存在')
+                }
+                else {
+                    ElMessage.error('验证失败')
+                }
+                
             })
             codeImg.value.changeCode()
         }
@@ -146,22 +153,26 @@ const confirm = async()=>{
     }
     else{
         await forgetPassword(password.value).then(res=>{
-            if(res.data.msg === "SUCCESS"){
-                flag.value = false
-                forgetPage.value = false
-                ElNotification({
-                    title: '提示',
-                    message: '密码修改成功!请牢记密码！',
-                    type: 'success'
-                });
-                userStore.setToken('')
-                router.push('/login')
+            flag.value = false
+            forgetPage.value = false
+            ElNotification({
+                title: '提示',
+                message: '密码修改成功!请牢记密码！',
+                type: 'success'
+            });
+            userStore.setToken('')
+            router.push('/login')
+        }).catch(err=>{
+            let msg = err.response.data.ERROR
+            if (msg == "Not allow"){
+                ElMessage.error('不允许该操作，请刷新后重试')
+            }
+            else if (msg == "No user exists"){
+                ElMessage.error('用户不存在，请刷新后重试')
             }
             else{
                 ElMessage.error('密码修改失败')
             }
-        }).catch(err=>{
-            ElMessage.error('密码修改失败')
         })
         
     }
