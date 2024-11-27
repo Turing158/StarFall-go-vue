@@ -87,18 +87,26 @@ const getTopic = async () => {
   await findAllTopicByUser(page.value, user.value)
     .then((res) => {
       let data = res.data.object
-      let num = res.data.num
-      topicData.value = data
-      topicTotal.value = num
+      topicData.value = data.topics
+      topicTotal.value = data.count
       loading.value = false
     })
     .catch((err) => {
       ElMessage.error('获取主题列表失败')
+      topicData.value = []
+      topicTotal.value = 0
       loading.value = false
     })
   bookOut.value.setHeight()
 }
 const getUserInfo = async()=>{
+  if (route.params.user == ""){
+    ElMessage.error('null')
+    topicData.value = []
+    topicTotal.value = 0
+    loading.value = false
+    return
+  }
   await findUserinfo(route.params.user).then(res=>{
     let msg = res.data.msg
     if(msg == 'USER_ERROR'){
