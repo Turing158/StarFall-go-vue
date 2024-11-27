@@ -79,9 +79,8 @@ const getTopic = async () => {
   await findAllTopicByUser(page.value, userStore.user)
     .then((res) => {
       let data = res.data.object
-      let num = res.data.num
-      topicData.value = data
-      topicTotal.value = num
+      topicData.value = data.topics
+      topicTotal.value = data.count
       loading.value = false
     })
     .catch((err) => {
