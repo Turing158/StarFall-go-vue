@@ -78,28 +78,31 @@ const confirm = async () => {
   } else if (newPassword.value != againPassword.value) {
     ElMessage.error('新密码与再次输入的密码不同')
   } else {
-    await settingPassword(oldPassword.value, newPassword.value, code.value)
+    await settingPassword(oldPassword.value, newPassword.value, codeImg.value.codeId+":"+code.value)
       .then((res) => {
-        let msg = res.data.msg
-        if (msg == 'CODE_ERROR') {
+        ElNotification({
+          title:'修改成功',
+          message:'成功修改密码，下次登录记得注意',
+          type:'success'
+        })
+        oldPassword.value = ''
+        newPassword.value = ''
+        againPassword.value = ''
+      })
+      .catch((err) => {
+        if (msg == 'The code is wrong') {
           ElMessage.error('验证码错误')
-        } 
-        else if (msg == 'PASSWORD_ERROR') {
+        }
+        else if (msg == "The token is not exist user"){
+          ElMessage.error('用户不存在')
+        }
+        else if (msg == 'The OldPassword is wrong') {
           ElMessage.error('旧密码错误')
         }
         else{
-          ElNotification({
-            title:'修改成功',
-            message:'成功修改密码，下次登录记得注意',
-            type:'success'
-          })
-          oldPassword.value = ''
-          newPassword.value = ''
-          againPassword.value = ''
+          ElMessage.error('服务异常')
         }
-      })
-      .catch((err) => {
-        ElMessage.error('服务异常')
+        
       })
       code.value = ''
       codeImg.value.changeCode()

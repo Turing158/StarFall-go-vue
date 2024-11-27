@@ -48,12 +48,7 @@ const newEmail = ref('')
 const newCode = ref('')
 const onGetOldEmailCode = async() => {
   await getOldEmailCode().then(res => {
-    if(res.data.msg === "SUCCESS"){
-      ElMessage.success('验证码发送成功')
-    }
-    else{
-      ElMessage.error('验证码发送失败')
-    }
+    ElMessage.success('验证码发送成功')
   }).catch(err => {
     ElMessage.error('验证码发送失败')
   })
@@ -64,14 +59,9 @@ const onGetNewEmailCode = async() => {
   }
   else{
     await getNewEmailCode(newEmail.value).then(res => {
-      if(res.data.msg === "SUCCESS"){
-        ElMessage.success('验证码发送成功')
-      }
-      else{
-        ElMessage.error('验证码发送失败')
-      }
+      ElMessage.success('验证码发送成功')
     }).catch(err => {
-      ElMessage.error('服务异常')
+      ElMessage.error('验证码发送失败')
     })
   }
 }
@@ -88,35 +78,31 @@ const changeEmail = async() => {
   }
   else{
     await updateEmail(oldCode.value, newEmail.value, newCode.value).then(res => {
-      console.log(res);
-      let msg = res.data.msg
-      if(msg === "SUCCESS"){
-        let data = res.data.object
-        ElMessage.success('修改成功')
-        userStore.setEmail(newEmail.value)
-        userStore.setToken(data)
-        router.go(0)
-      }
-      else if(msg == 'OLD_EMAIL_CODE_EXPIRED'){
+      let data = res.data.object
+      ElMessage.success('修改成功')
+      userStore.setEmail(newEmail.value)
+      userStore.setToken(data)
+      router.go(0)
+      
+    }).catch(err => {
+      if(msg == 'The Old Email code expired'){
         ElMessage.error('旧邮箱验证码已过期或不存在')
       }
-      else if(msg == 'NEW_EMAIL_CODE_EXPIRED'){
+      else if(msg == 'The New Email code expired'){
         ElMessage.error('新邮箱验证码已过期或不存在')
       }
-      else if(msg === "OLD_EMAIL_CODE_ERROR"){
+      else if(msg === "The Old Email code is wrong"){
         ElMessage.error('旧邮箱验证码错误')
       }
-      else if(msg === "NEW_EMAIL_CODE_ERROR"){
+      else if(msg === "The New Email code is wrong"){
         ElMessage.error('新邮箱验证码错误')
       }
-      else if(msg === "EMAIL_ERROR"){
+      else if(msg === "The New Email is already exists"){
         ElMessage.error('邮箱已存在')
       }
       else{
         ElMessage.error('修改失败')
       }
-    }).catch(err => {
-      ElMessage.error('服务异常')
     })
   }
 }
