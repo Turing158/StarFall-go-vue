@@ -64,25 +64,29 @@ const onDel = async(id) => {
   })
     .then(async () => {
       await deleteTopic(id).then(res=>{
-        let msg = res.data.msg
-        if(msg == 'SUCCESS'){
-          router.go(0)
-          ElNotification({
-            title: '删除成功',
-            message: '成功删除主题:'+props.item.title,
-            type: 'success'
-          })
-        }
-        else{
-          ElNotification({
-            title: '删除失败',
-            message: '删除主题:'+props.item.title+'失败',
-            type: 'error'
-          })
-        }
+        router.go(0)
+        ElNotification({
+          title: '删除成功',
+          message: '成功删除主题:'+props.item.title,
+          type: 'success'
+        })
+        
       }).catch(err=>{
-        ElMessage.error('删除主题失败')
-        console.log(err);
+        let msg = err.response.data.ERROR
+        if (msg == "ID is not a number"){
+          ElMessage.error('删除失败，ID不是数字')
+        }
+        else if (msg == "DataSource error"){
+          ElMessage.error('删除失败，数据源错误')
+        }
+        else if(msg == "You are not allowed to delete this topic"){
+          ElMessage.error('删除失败，您无权删除此主题')
+        }
+        ElNotification({
+          title: '删除失败',
+          message: '删除主题:'+props.item.title+'失败',
+          type: 'error'
+        })
       })
     })
     .catch(() => {

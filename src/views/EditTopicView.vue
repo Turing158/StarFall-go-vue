@@ -210,37 +210,62 @@ const init = async () => {
   if (route.params.id) {
     await isPromiseToEdit(route.params.id)
       .then(async(res) => {
-        let msg = res.data.msg
-        if (msg == 'SUCCESS') {
-          await hasPromiseToEdit(route.params.id).then(res=>{
-            let msg = res.data.msg
-            if(msg == 'SUCCESS'){
-              let data = res.data.object
-              title.value = data.title
-              label.value = data.label
-              subtitle.value = data.topicTitle
-              subtitleEn.value = data.enTitle
-              source.value = data.source
-              version.value = data.version
-              author.value = data.author
-              language.value = data.language
-              address.value = data.address
-              download.value = data.download
-              content.value = data.content
-            }
-            else{
-              errorPromise()
-            }
-            
-          }).catch(err=>{
-            ElMessage.error("服务异常")
+        await hasPromiseToEdit(route.params.id).then(res=>{
+          let data = res.data.object
+          title.value = data.title
+          label.value = data.label
+          subtitle.value = data.topicTitle
+          subtitleEn.value = data.enTitle
+          source.value = data.source
+          version.value = data.version
+          author.value = data.author
+          language.value = data.language
+          address.value = data.address
+          download.value = data.download
+          content.value = data.content
+        }).catch(err=>{
+          let msg = err.response.data.ERROR
+        if (msg == "ID is not a number"){
+          ElNotification({
+            title: 'ID错误',
+            message: 'ID不是一个数字',
+            type: 'error'
           })
-        } else {
-          errorPromise()
         }
+        else if (msg == "You are not allowed to edit this topic"){
+          ElNotification({
+            title: '访问拒绝',
+            message: '不允许编辑该主题帖',
+            type: 'error'
+          })
+        }
+        else if (msg == "This topic does not exist"){
+          ElNotification({
+            title: '访问拒绝',
+            message: '该主题帖不存在',
+            type: 'error'
+          })
+        }
+          errorPromise()
+        })
       })
       .catch((err) => {
-        ElMessage.error('服务异常')
+        let msg = err.response.data.ERROR
+        if (msg == "ID is not a number"){
+          ElNotification({
+            title: 'ID错误',
+            message: 'ID不是一个数字',
+            type: 'error'
+          })
+        }
+        else if (msg == "You are not allowed to edit this topic"){
+          ElNotification({
+            title: '访问拒绝',
+            message: '不允许编辑该主题帖',
+            type: 'error'
+          })
+        }
+        errorPromise()
       })
   }
   bookOut.value.setHeight()
@@ -256,74 +281,84 @@ const errorPromise = ()=>{
 const append = async (data) => {
   await appendTopic(data)
     .then(async(res) => {
-      let msg = res.data.msg
-      if (msg == 'LEVEL_ERROR') {
+      let data = res.data.object
+      router.push('/topic/detail/' + data.id)
+      ElNotification({
+        title: '发布成功',
+        message: '成功发布'+title.value,
+        type: 'success'
+      })
+      ElNotification({
+        title: '获得经验',
+        message: "经验添加"+data.exp+"点",
+        type: 'success'
+      })
+      await getUserInfo().then(res=>{
+        let data = res.data.object
+          userStore.setUserObject(
+            data.user,
+            data.name,
+            data.level,
+            data.exp,
+            data.maxExp,
+            data.gender,
+            data.birthday,
+            data.avatar,
+            data.email
+          )
+      })
+    })
+    .catch((err) => {
+      let msg = err.response.data.ERROR
+      console.log(err);
+      if (msg == 'You are not allowed to post') {
         ElNotification({
           title: '等级不足',
           message: '虽然不知道你为什么可以这样操作，但是你的等级不足',
           type: 'error'
         })
-      } else if (msg == 'CODE_ERROR') {
+      } else if (msg == 'The code is wrong') {
         ElMessage.error('验证码错误')
         code.value = ''
-      } else {
-        let data = res.data.object
-        let num = res.data.num
-        router.push('/topic/detail/' + data)
-        ElNotification({
-          title: '发布成功',
-          message: '成功发布'+title.value,
-          type: 'success'
-        })
-        ElNotification({
-          title: '获得经验',
-          message: "经验添加"+num+"点",
-          type: 'success'
-        })
-        await getUserInfo().then(res=>{
-          let data = res.data.object
-            userStore.setUserObject(
-              data.user,
-              data.name,
-              data.level,
-              data.exp,
-              data.maxExp,
-              data.gender,
-              data.birthday,
-              data.avatar,
-              data.email
-            )
-        })
       }
-    })
-    .catch((err) => {
-      ElMessage.error('服务异常')
+      else if(msg == "DataSource error"){
+        ElMessage.error('数据源错误')
+      } else {
+        ElMessage.error('服务异常')
+      }
     })
 }
 const edit = async (data) => {
   await editTopic(data).then(res=>{
-    let msg = res.data.msg
-    if(msg == 'SUCCESS'){
-      ElNotification({
-        title: '编辑成功',
-        message: '成功编辑'+title.value,
-        type: 'success'
-      })
-      router.push('/topic/detail/' + route.params.id)
-    }
-    else if(msg == 'CODE_ERROR'){
+    ElNotification({
+      title: '编辑成功',
+      message: '成功编辑'+title.value,
+      type: 'success'
+    })
+    router.push('/topic/detail/' + route.params.id)
+  }).catch(err=>{
+    let msg = err.response.data.ERROR
+    if(msg == 'The code is wrong'){
       ElMessage.error('验证码错误')
       code.value = ''
     }
-    else if(msg == 'REJECT'){
+    else if(msg == "You are not allowed to edit this topic"){
+      ElNotification({
+        title: '访问拒绝',
+        message: '不允许编辑该主题帖',
+        type: 'error'
+      })
       errorPromise()
+    }
+    else if (msg == "Data Error"){
+      ElMessage.error('数据错误')
+    }
+    else if(msg == "DataSource error"){
+      ElMessage.error('数据库错误')
     }
     else{
       ElMessage.error('服务异常')
     }
-    console.log(msg);
-  }).catch(err=>{
-    ElMessage.error('服务异常')
   })
 
 }
@@ -394,7 +429,7 @@ const onConfirm = async () => {
     })
   } else {
     let data = {
-      id: route.params.id,
+      id: Number(route.params.id),
       title: title.value,
       label: label.value,
       topicTitle: subtitle.value,
@@ -406,11 +441,12 @@ const onConfirm = async () => {
       address: address.value,
       download: download.value,
       content: content.value,
-      code: code.value
+      code: codeImg.value.codeId+":"+code.value
     }
     if (route.params.id) {
       edit(data)
     } else {
+      data.id = 0
       append(data)
     }
     codeImg.value.changeCode()
