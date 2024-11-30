@@ -19,7 +19,7 @@ const props = defineProps({
 <style scoped>
 
 .item{
-    height: 100px;
+    height: 60px;
     background-color: #f8eecf;
     border-bottom: 1px solid #aaa;
     cursor: pointer;
@@ -32,26 +32,26 @@ const props = defineProps({
     background-color: #eee1c1;
 }
 .item .avatar{
-    width: 60px;
-    height: 60px;
+    width: 40px;
+    height: 40px;
     background-color: #f1f1f1;
-    margin: 15px 10px;
+    margin: 10px 10px;
     border-radius: 10px;
 }
 .item .avatar img{
     margin: 2.5px;
-    width: 55px;
-    height: 55px;
+    width: 35px;
+    height: 35px;
     border-radius: 10px;
 
 }
 .item .info{
-    height: 80px;
-    margin: 15px 0;
+    height: 40px;
+    margin: 10px 0;
 }
 .username{
-    height: 35px;
-    font-size: 18px;
+    height: 28px;
+    font-size: 17px;
     font-weight: bold;
 }
 .content{
@@ -62,6 +62,5 @@ const props = defineProps({
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    
 }
 </style>

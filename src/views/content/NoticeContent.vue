@@ -2,7 +2,7 @@
     <div>
         <Book>
             <table class="noticeBlock">
-                <tr>
+                <tr class="chatTop">
                     <th class="listTitle"></th>
                     <th class="userTitle">
                         <div class="userTitleMain">
@@ -18,7 +18,7 @@
                             </div>
                         </div>
                     </td>
-                    <td>
+                    <td class="chatBox">
                         <div ref="noticeUser" class="noticeUser">
                             <div v-for="(item,index) in notices" :key="index">
                                 <NoticeUserView :notices="item"/>
@@ -62,11 +62,8 @@ const init = async()=>{
 }
 const getUserList = async()=>{
     await findMessageList().then(res=>{
-        let msg = res.data.msg;
-        if(msg == 'SUCCESS'){
-            let data = res.data.object
-            noticeUserList.value = data
-        }
+        console.log(res);
+        noticeUserList.value = res.data.object
         
     }).catch(err=>{
         ElMessage.error('服务异常');
@@ -78,19 +75,16 @@ const setViewBottom = ()=>{
 const getUserMsg = async(fromUser)=>{
     notices.value = []
     await findMsgByToUserAndFromUser(fromUser).then(res=>{
-        let msg = res.data.msg;
-        if(msg == 'SUCCESS'){
-            let data = res.data.object
-            for (let i = 0; i < data.length; i++) {
-                let contents = data[i].content.split('[&divide&]')
-                notices.value.push({
-                    fromUser: data[i].fromUser,
-                    fromAvatar: data[i].fromAvatar,
-                    date: data[i].date,
-                    contents: contents
-                })
-            }
-        } 
+        let data = res.data.object
+        for (let i = 0; i < data.length; i++) {
+            let contents = data[i].content.split('[&divide&]')
+            notices.value.push({
+                fromUser: data[i].fromUser,
+                fromAvatar: data[i].fromAvatar,
+                date: data[i].date,
+                contents: contents
+            })
+        }
     }).catch(err=>{
         ElMessage.error('服务异常');
         console.log(err);
@@ -169,42 +163,36 @@ const send = async()=>{
     }
     let indexTmp = listIndex.value
     await sendMessage(noticeUserList.value[indexTmp].user,contentValue.value).then(res=>{
-        let msg = res.data.msg
-        if(msg == 'SUCCESS'){
-            let data = res.data.object
-            noticeUserList.value[indexTmp].lastContent = data.content
-            let obj = {
-                fromUser: userStore.user,
-                fromAvatar: userStore.avatar,
-                date: data.date,
-                contents: [data.content]
+        let data = res.data.object
+        noticeUserList.value[indexTmp].lastContent = data.content
+        let obj = {
+            fromUser: userStore.user,
+            fromAvatar: userStore.avatar,
+            date: data.date,
+            contents: [data.content]
+        }
+        if(notices.value[notices.value.length-1].fromUser == obj.fromUser){
+            if(timeDiff(notices.value[notices.value.length-1].date,obj.date) < 1){
+                notices.value[notices.value.length-1].contents.push(data.content)
             }
-            if(notices.value[notices.value.length-1].fromUser == obj.fromUser){
-                if(timeDiff(notices.value[notices.value.length-1].date,obj.date) < 1){
-                    notices.value[notices.value.length-1].contents.push(data.content)
-                }
-                else{
-                    notices.value.push(obj)
-                }
-            }else{
+            else{
                 notices.value.push(obj)
             }
-            setTimeout(() => {
-                setViewBottom()
-            }, 10);
+        }else{
+            notices.value.push(obj)
         }
-        else{
-            ElMessage.error('发送失败');
-        }
+        setTimeout(() => {
+            setViewBottom()
+        }, 10);
     }).catch(err=>{
-        ElMessage.error('服务异常');
+        ElMessage.error('发送失败');
     })
 }
 const timeDiff = (newDate,oldDate)=>{
     let new_date = new Date(newDate)
     let old_date = new Date(oldDate)
     let diffInMilliseconds = new_date.getTime() - old_date.getTime()
-    return Math.abs(diffInMilliseconds / (1000 * 60))
+    return Math.abs(diffInMilliseconds / (1000 * 60 * 2))
 }
 onMounted(init)
 </script>
@@ -218,6 +206,12 @@ onMounted(init)
     font-size: 20px;
     font-weight: bold;
     background-color: #f3ddab;
+}
+.noticeBlock .chatTop{
+    border-bottom: 1px solid #aaa;
+}
+.noticeBlock .chatBox{
+    border-left: 1px solid #aaa;
 }
 .noticeBlock .listTitle{
     width: 25%;
@@ -241,6 +235,7 @@ onMounted(init)
     overflow-y: auto;
     overflow-x: hidden;
     transition: all 250ms;
+    border-right: 1px solid #111;
 }
 .noticeList::-webkit-scrollbar {
     width: 6px;
@@ -277,6 +272,7 @@ onMounted(init)
     padding: 10px;
     resize: none;
     background-color: #f1f1f1;
+    border-top: 1px solid #aaa;
 }
 .operate{
     width: 100%;
