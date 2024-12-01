@@ -157,8 +157,8 @@ const send = async()=>{
         ElMessage.error('消息内容不能为空');
         return;
     }
-    else if(contentValue.value.length < 10){
-        ElMessage.error('消息内容不能少于10个字符');
+    else if(contentValue.value.length < 5){
+        ElMessage.error('消息内容不能少于5个字符');
         return;
     }
     let indexTmp = listIndex.value
@@ -184,6 +184,7 @@ const send = async()=>{
         setTimeout(() => {
             setViewBottom()
         }, 10);
+        contentValue.value = ''
     }).catch(err=>{
         ElMessage.error('发送失败');
     })
